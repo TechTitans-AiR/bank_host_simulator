@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface BankAccountRepository extends MongoRepository<BankAccount, String> {
     Optional<BankAccount> findByCardNumberAndCvc(String cardNumber, Integer cvc);
     List<BankAccount> findAll();
+
+    Optional<BankAccount> findByCardNumberAndCvcAndExpirationDate(String cardNumber, Integer cvc, String expirationDate);
 }
