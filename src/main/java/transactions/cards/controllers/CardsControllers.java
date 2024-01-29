@@ -51,15 +51,12 @@ public class CardsControllers {
     private boolean processTransactionRequest(CardsDto transactionRequest) {
 
         Optional<BankAccount> optionalBankAccount = bankAccountService
-                .findBankAccount(transactionRequest.getCardNumber(), transactionRequest.getCvc());
+                .findBankAccount(transactionRequest.getCardNumber(), transactionRequest.getCvc(), transactionRequest.getExpirationDate());
 
         if (optionalBankAccount.isPresent()) {
             BankAccount bankAccount = optionalBankAccount.get();
 
-            if (!bankAccountService.checkCardExpiration(bankAccount)) {
-                System.out.println("Card expired.");
-                return false;
-            }
+
 
             if (bankAccountService.checkSufficientFunds(bankAccount, transactionRequest.getBalance())) {
                 if (bankAccountService.updateBalance(bankAccount, transactionRequest.getBalance())) {

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,11 +40,12 @@ public class BankAccountService {
         return bankAccountRepository.findAll();
     }
 
-    public Optional<BankAccount> findBankAccount(String cardNumber, Integer cvc) {
+    public Optional<BankAccount> findBankAccount(String cardNumber, Integer cvc, String expirationDate) {
         System.out.println("Searching for card with number: " + cardNumber);
         System.out.println("Searching for card with cvc: " + cvc);
+        System.out.println("Searching for card with expiration date: " + expirationDate);
 
-        Optional<BankAccount> optionalBankAccount = bankAccountRepository.findByCardNumberAndCvc(cardNumber, cvc);
+        Optional<BankAccount> optionalBankAccount = bankAccountRepository.findByCardNumberAndCvcAndExpirationDate(cardNumber, cvc, expirationDate);
 
         if (optionalBankAccount.isPresent()) {
             System.out.println("Card found: " + optionalBankAccount.get());
@@ -54,30 +56,13 @@ public class BankAccountService {
         return optionalBankAccount;
     }
 
+
     public boolean checkSufficientFunds(BankAccount bankAccount, double requestedAmount) {
         return bankAccount.getBalance() >= requestedAmount;
     }
 
-    public boolean checkCardExpiration(BankAccount bankAccount) {
-        try {
-            String[] dateParts = bankAccount.getExpirationDate().split("-");
-            int year = Integer.parseInt(dateParts[0]);
-            int month = Integer.parseInt(dateParts[1]);
-
-            LocalDate currentDate = LocalDate.now();
-
-            return (year > currentDate.getYear()) || (year == currentDate.getYear() && month >= currentDate.getMonthValue());
-        } catch (Exception e) {
-            System.out.println("Error checking card expiration: " + e.getMessage());
-            return false;
-        }
-    }
     public boolean updateBalance(BankAccount bankAccount, double amount) {
         try {
-            if (!checkCardExpiration(bankAccount)) {
-                System.out.println("Card has expired.");
-                return false;
-            }
             double newBalance = bankAccount.getBalance() - amount;
             bankAccount.setBalance(newBalance);
             bankAccountRepository.save(bankAccount);
